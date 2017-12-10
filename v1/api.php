@@ -9,6 +9,7 @@
 require_once 'config.php';
 require_once 'vendor/autoload.php';
 use \BowlingBall\Http\Methods as Methods;
+use \BowlingBall\Controllers\BrandsController as BrandsController;
 
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  use ($baseURI) {
@@ -34,7 +35,33 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
 
     };
 
+    /*Brand Closures*/
+    $getAllBrands = function ($args)
+    {
+        $brand = new BrandsController();
+
+        $val = $brand->getAllBrands();
+
+        return $val;
+    };
+
+    $getBrandByID = function ($args)
+    {
+        $brand = new BrandsController();
+
+        $val = $brand->getBrandByID($args['id']);
+
+        return $val;
+    };
+
+    /*Routes*/
+
+    /*Token Routes*/
     $r->addRoute(Methods::POST, $baseURI . '/tokens', $handlePostToken);
+
+    /*BrandRoutes*/
+    $r->addRoute(Methods::GET, $baseURI . '/brands', $getAllBrands);
+    $r->addRoute(Methods::GET, $baseURI . '/brands/{id:\d+}', $getBrandByID);
 
 });
 
