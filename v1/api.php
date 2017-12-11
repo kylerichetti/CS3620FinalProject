@@ -44,7 +44,6 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
 
         return $val;
     };
-
     $getBrandByID = function ($args)
     {
         $brand = new BrandsController();
@@ -53,7 +52,6 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
 
         return $val;
     };
-
     $createBrand = function ($args)
     {
         $brand = new BrandsController();
@@ -61,6 +59,17 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
         $json = $_POST;
 
         return $brand->createBrand($json);
+    };
+    $updateBrand = function($args){
+        $brand = new BrandsController();
+
+        //$json = (array) json_decode(file_get_contents('php://input'));
+        parse_str(file_get_contents('php://input'), $json);
+
+        return $brand->updateBrand($args['id'], $json);
+    };
+    $deleteBrand = function($args){
+
     };
 
     /*Routes*/
@@ -72,6 +81,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $r->addRoute(Methods::GET, $baseURI . '/brands', $getAllBrands);
     $r->addRoute(Methods::GET, $baseURI . '/brands/{id:\d+}', $getBrandByID);
     $r->addRoute(Methods::POST, $baseURI . '/brands', $createBrand);
+    $r->addRoute(Methods::PATCH, $baseURI . '/brands/{id:\d+}', $updateBrand);
+    $r->addRoute(Methods::DELETE, $baseURI . '/brands/{id:\d+}', $deleteBrand);
 
 });
 

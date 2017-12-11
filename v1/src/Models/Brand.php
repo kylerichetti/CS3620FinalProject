@@ -106,7 +106,6 @@ class Brand implements \JsonSerializable
     }
 
     public function createBrand(){
-        //Break out into its own function?
         $nameExists = $this->checkDatabaseForBrandName(1);
         if($nameExists != false){
             //Brand already exists, return a -1
@@ -131,6 +130,26 @@ class Brand implements \JsonSerializable
         return -1;
     }
 
+    public function updateBrand($newBrandName){
+        //Get DB connection
+        $db = dbConnection::getInstance();
+
+        //Write update statement
+        $updateStm = $db->prepare('UPDATE `Brand` SET `brandName`=:newBrandName WHERE `brandName` = :oldBrandName');
+
+        //Bind params
+        $updateStm->bindParam('newBrandName', $newBrandName);
+        $updateStm->bindParam('oldBrandName', $this->brandName);
+
+        //Execute
+        //Return success or failure
+        if($updateStm->execute()){
+            return 1;
+        }
+        else{
+            return -1;
+        }
+    }
     private function checkDatabaseForBrandName(bool $isActive){
         $db = dbConnection::getInstance();
 
