@@ -54,14 +54,24 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
         return $val;
     };
 
+    $createBrand = function ($args)
+    {
+        $brand = new BrandsController();
+
+        $json = $_POST;
+
+        return $brand->createBrand($json);
+    };
+
     /*Routes*/
 
     /*Token Routes*/
     $r->addRoute(Methods::POST, $baseURI . '/tokens', $handlePostToken);
 
-    /*BrandRoutes*/
+    /*Brand Routes*/
     $r->addRoute(Methods::GET, $baseURI . '/brands', $getAllBrands);
     $r->addRoute(Methods::GET, $baseURI . '/brands/{id:\d+}', $getBrandByID);
+    $r->addRoute(Methods::POST, $baseURI . '/brands', $createBrand);
 
 });
 
