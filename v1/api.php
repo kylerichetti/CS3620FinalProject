@@ -11,6 +11,7 @@ require_once 'vendor/autoload.php';
 use \BowlingBall\Http\Methods as Methods;
 use \BowlingBall\Controllers\BrandsController as BrandsController;
 use \BowlingBall\Controllers\CoresController as CoresController;
+use \BowlingBall\Controllers\CoverstocksController as CoverstocksController;
 
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  use ($baseURI) {
@@ -126,6 +127,51 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
         return $coreCtrl->deleteCore($args['id']);
     };
 
+    /*Coverstock Closures*/
+    $getAllCoverstocks = function ($args)
+    {
+        $coverstockCtrl = new CoverstocksController();
+
+        $val = $coverstockCtrl->getAllCoverstocks();
+
+        return $val;
+    };
+    $getCoverstockByID = function ($args)
+    {
+        $coverstockCtrl = new CoverstocksController();
+
+        $val = $coverstockCtrl->getCoverstockByID($args['id']);
+
+        return $val;
+    };
+    $createCoverstock = function ($args)
+    {
+        $coverstockCtrl = new CoverstocksController();
+        $json = array();
+        if (!empty($_POST['coverstockTypeName'])) {
+            $json['coverstockTypeName'] = filter_var($_POST['coverstockTypeName'], FILTER_SANITIZE_STRING);
+        }
+        else{
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            die("Error: No body in POST");
+        }
+
+        return $coverstockCtrl->createCoverstock($json);
+    };
+    $updateCoverstock = function($args)
+    {
+        $coverstockCtrl = new CoverstocksController();
+
+        parse_str(file_get_contents('php://input'), $json);
+
+        return $coverstockCtrl->updateCoverstock($args['id'], $json);
+    };
+    $deleteCoverstock = function($args)
+    {
+        $coverstockCtrl = new CoverstocksController();
+        return $coverstockCtrl->deleteCoverstock($args['id']);
+    };
+
     /*Routes*/
 
     /*Token Routes*/
@@ -144,6 +190,13 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $r->addRoute(Methods::POST, $baseURI . '/cores', $createCore);
     $r->addRoute(Methods::PATCH, $baseURI . '/cores/{id:\d+}', $updateCore);
     $r->addRoute(Methods::DELETE, $baseURI . '/cores/{id:\d+}', $deleteCore);
+
+    /*Coverstock Routes*/
+    $r->addRoute(Methods::GET, $baseURI . '/coverstocks', $getAllCoverstocks);
+    $r->addRoute(Methods::GET, $baseURI . '/coverstocks/{id:\d+}', $getCoverstockByID);
+    $r->addRoute(Methods::POST, $baseURI . '/coverstocks', $createCoverstock);
+    $r->addRoute(Methods::PATCH, $baseURI . '/coverstocks/{id:\d+}', $updateCoverstock);
+    $r->addRoute(Methods::DELETE, $baseURI . '/coverstocks/{id:\d+}', $deleteCoverstock);
 
 });
 
