@@ -22,19 +22,15 @@ class Brand implements \JsonSerializable
             $this->populate();
         }
     }
-    private function setIDAndName($brandID, $brandName){
-        $this->brandID = $brandID;
-        $this->brandName = $brandName;
-    }
     public function getBrandName()
     {
         return $this->brandName;
     }
     public function setBrandName($name){
         //Sanitize data
+        //$this->brandName = filter_var($name, FILTER_SANITIZE_STRING);
         $this->brandName = $name;
     }
-
 
     public function JsonSerialize()
     {
@@ -69,12 +65,10 @@ class Brand implements \JsonSerializable
         if ($results) {
             //If brand was found in the database, populate model
             $this->brandName = $results['brandName'];
-            return 1;
         }
         else{
             //Brand wasn't found in the data base
-            $this->brandName = "-1";
-            return -1;
+            $this->brandName = NULL;
         }
 
     }
@@ -101,10 +95,13 @@ class Brand implements \JsonSerializable
             array_push($brandArray, $brand);
         }
 
+        if(empty($brandArray)){
+            return false;
+        }
+
         return $brandArray; //Add a check to see if it's empty or not
 
     }
-
     public function createBrand(){
         $nameExists = $this->checkDatabaseForBrandName(0);
         $db = dbConnection::getInstance();
@@ -121,16 +118,13 @@ class Brand implements \JsonSerializable
 
         //Execute
         if($stmInsert->execute()){
-            //Return a 1 to indicate success
-            //Should return a resource representation
+            //Return true to indicate success
             $this->getIDFromName();
             return true;
         }
-
         //Something went wrong with the insert
         return false;
     }
-
     public function updateBrand($newBrandName){
         //Get DB connection
         $db = dbConnection::getInstance();
@@ -142,17 +136,14 @@ class Brand implements \JsonSerializable
         $updateStm->bindParam('newBrandName', $newBrandName);
         $updateStm->bindParam('oldBrandName', $this->brandName);
 
-        //Execute
-        //Return success or failure
+        //Execute and return success or failure
         if($updateStm->execute()){
             $this->setBrandName($newBrandName);
             return true;
         }
-        else{
-            return false;
-        }
-    }
 
+        return false;
+    }
     public function deleteBrand(){
         //Get DB connection
         $db = dbConnection::getInstance();
@@ -166,15 +157,17 @@ class Brand implements \JsonSerializable
         //Execute
         //Return success or failure
         if($deleteStm->execute()){
-            return 1;
+            return true;
         }
-        else{
-            return -1;
-        }
+        return false;
+    }
+
+    private function setIDAndName($brandID, $brandName){
+        $this->brandID = $brandID;
+        $this->brandName = $brandName;
     }
     private function checkDatabaseForBrandName(bool $isActive){
         $db = dbConnection::getInstance();
-
         //Param decides if we only want brands that are active or all brands
 
         //Build database query

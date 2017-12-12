@@ -38,38 +38,46 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     /*Brand Closures*/
     $getAllBrands = function ($args)
     {
-        $brand = new BrandsController();
+        $brandCtrl = new BrandsController();
 
-        $val = $brand->getAllBrands();
+        $val = $brandCtrl->getAllBrands();
 
         return $val;
     };
     $getBrandByID = function ($args)
     {
-        $brand = new BrandsController();
+        $brandCtrl = new BrandsController();
 
-        $val = $brand->getBrandByID($args['id']);
+        $val = $brandCtrl->getBrandByID($args['id']);
 
         return $val;
     };
     $createBrand = function ($args)
     {
-        $brand = new BrandsController();
+        $brandCtrl = new BrandsController();
+        $json = array();
+        if (!empty($_POST['brandName'])) {
+            $json['brandName'] = filter_var($_POST['brandName'], FILTER_SANITIZE_STRING);
+        }
+        else{
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            die("Error: No body in POST");
+        }
 
-        $json = $_POST;
-
-        return $brand->createBrand($json);
+        return $brandCtrl->createBrand($json);
     };
-    $updateBrand = function($args){
-        $brand = new BrandsController();
+    $updateBrand = function($args)
+    {
+        $brandCtrl = new BrandsController();
 
         parse_str(file_get_contents('php://input'), $json);
 
-        return $brand->updateBrand($args['id'], $json);
+        return $brandCtrl->updateBrand($args['id'], $json);
     };
-    $deleteBrand = function($args){
-        $brand = new BrandsController();
-        return $brand->deleteBrand($args['id']);
+    $deleteBrand = function($args)
+    {
+        $brandCtrl = new BrandsController();
+        return $brandCtrl->deleteBrand($args['id']);
     };
 
     /*Routes*/
