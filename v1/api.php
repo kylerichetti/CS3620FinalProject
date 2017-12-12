@@ -10,6 +10,7 @@ require_once 'config.php';
 require_once 'vendor/autoload.php';
 use \BowlingBall\Http\Methods as Methods;
 use \BowlingBall\Controllers\BrandsController as BrandsController;
+use \BowlingBall\Controllers\CoresController as CoresController;
 
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  use ($baseURI) {
@@ -80,6 +81,51 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
         return $brandCtrl->deleteBrand($args['id']);
     };
 
+    /*Core Closures*/
+    $getAllCores = function ($args)
+    {
+        $coreCtrl = new CoresController();
+
+        $val = $coreCtrl->getAllCores();
+
+        return $val;
+    };
+    $getCoreByID = function ($args)
+    {
+        $coreCtrl = new CoresController();
+
+        $val = $coreCtrl->getCoreByID($args['id']);
+
+        return $val;
+    };
+    $createCore = function ($args)
+    {
+        $coreCtrl = new CoresController();
+        $json = array();
+        if (!empty($_POST['coreTypeName'])) {
+            $json['coreTypeName'] = filter_var($_POST['coreTypeName'], FILTER_SANITIZE_STRING);
+        }
+        else{
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            die("Error: No body in POST");
+        }
+
+        return $coreCtrl->createCore($json);
+    };
+    $updateCore = function($args)
+    {
+        $coreCtrl = new CoresController();
+
+        parse_str(file_get_contents('php://input'), $json);
+
+        return $coreCtrl->updateCore($args['id'], $json);
+    };
+    $deleteCore = function($args)
+    {
+        $coreCtrl = new CoresController();
+        return $coreCtrl->deleteCore($args['id']);
+    };
+
     /*Routes*/
 
     /*Token Routes*/
@@ -91,6 +137,13 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $r->addRoute(Methods::POST, $baseURI . '/brands', $createBrand);
     $r->addRoute(Methods::PATCH, $baseURI . '/brands/{id:\d+}', $updateBrand);
     $r->addRoute(Methods::DELETE, $baseURI . '/brands/{id:\d+}', $deleteBrand);
+
+    /*Core Routes*/
+    $r->addRoute(Methods::GET, $baseURI . '/cores', $getAllCores);
+    $r->addRoute(Methods::GET, $baseURI . '/cores/{id:\d+}', $getCoreByID);
+    $r->addRoute(Methods::POST, $baseURI . '/cores', $createCore);
+    $r->addRoute(Methods::PATCH, $baseURI . '/cores/{id:\d+}', $updateCore);
+    $r->addRoute(Methods::DELETE, $baseURI . '/cores/{id:\d+}', $deleteCore);
 
 });
 
