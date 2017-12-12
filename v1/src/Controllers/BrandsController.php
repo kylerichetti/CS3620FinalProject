@@ -14,6 +14,7 @@ use \BowlingBall\Models\Brand;
 
 class BrandsController
 {
+    //Get a single brand by ID
     public function getBrandByID($brandID){
         $brand = new Brand($brandID);
 
@@ -24,7 +25,7 @@ class BrandsController
 
         return $brand;
     }
-
+    //Get all active brands
     public function getAllBrands()
     {
         $brands = (new Brand())->getAllBrands();
@@ -38,6 +39,8 @@ class BrandsController
     }
     //Create a brand
     public function createBrand($newBrandData){
+        //Permissions test
+
         $brand = new Brand(0);
         $newBrandName = $newBrandData['brandName'];
 
@@ -49,9 +52,10 @@ class BrandsController
         }
 
         //Try to insert new brand into database
-        if($brand->createBrand() == 1){
+        if($brand->createBrand()){
             //Insert succeeded
             http_response_code(StatusCodes::CREATED);
+            return $brand->JsonSerialize();
         }
         else{
             //Insert failed
@@ -59,14 +63,12 @@ class BrandsController
             http_response_code(StatusCodes::BAD_REQUEST);
             die("Insert failed");
         }
-
-        return "Success";
     }
     //Update a brand
     public function updateBrand($brandID, $updatedBrandData){
-        $brand = new Brand($brandID);
+        //Permissions test
 
-        //var_dump($updatedBrandData);
+        $brand = new Brand($brandID);
         $newBrandName = $updatedBrandData['brandName'];
 
         //Check if brand exists
@@ -74,18 +76,12 @@ class BrandsController
             http_response_code(StatusCodes::BAD_REQUEST);
             die("Brand not found");
         }
-        //Change brand model
-        /*if($brand->setBrandName($newBrandName) == -1){
-            //Error, tried to pass bad data as a brand name
-            http_response_code(StatusCodes::BAD_REQUEST);
-            die("Invalid brand name");
-        }*/
+
         //Update database
-        if($brand->updateBrand($newBrandName) == 1)
+        if($brand->updateBrand($newBrandName))
         {
-            //Response code?
             http_response_code(StatusCodes::OK);
-            return "Success";
+            return $brand->JsonSerialize();
         }
         else{
             //Response code?
@@ -94,7 +90,19 @@ class BrandsController
         }
     }
     //Soft delete a brand
-    public function deleteBrand(){
+    public function deleteBrand($brandID){
+        //Permissions test
 
+        $brand = new Brand($brandID);
+        if($brand->deleteBrand() == 1){
+            //Response code?
+            http_response_code(StatusCodes::OK);
+            return "Success";
+        }
+        else{
+            //Response code?
+            http_response_code(StatusCodes::NOT_MODIFIED);
+            die("Delete failed");
+        }
     }
 }

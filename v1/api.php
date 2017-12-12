@@ -63,13 +63,13 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $updateBrand = function($args){
         $brand = new BrandsController();
 
-        //$json = (array) json_decode(file_get_contents('php://input'));
         parse_str(file_get_contents('php://input'), $json);
 
         return $brand->updateBrand($args['id'], $json);
     };
     $deleteBrand = function($args){
-
+        $brand = new BrandsController();
+        return $brand->deleteBrand($args['id']);
     };
 
     /*Routes*/

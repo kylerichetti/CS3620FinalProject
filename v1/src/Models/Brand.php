@@ -106,35 +106,36 @@ class Brand implements \JsonSerializable
     }
 
     public function createBrand(){
-        $nameExists = $this->checkDatabaseForBrandName(1);
-        if($nameExists != false){
-            //Brand already exists, return a -1
-            return -1;
-        }
-        //If not, insert new brand into database
+        $nameExists = $this->checkDatabaseForBrandName(0);
         $db = dbConnection::getInstance();
-        $stmInsert = $db->prepare(
-            'INSERT INTO `Brand` (`brandName`, `isActive`)
-            VALUES (:brandName, 1)');
-
+        if($nameExists){
+            //If brand already exists, just make it active again
+            $stmInsert = $db->prepare('UPDATE `Brand` SET `isActive`=1 WHERE `brandName` = :brandName');
+        }
+        else {
+            //If not, insert new brand into database
+            $stmInsert = $db->prepare('INSERT INTO `Brand` (`brandName`, `isActive`) VALUES (:brandName, 1)');
+        }
         //Bind parameters
         $stmInsert->bindParam(':brandName', $this->brandName);
 
         //Execute
         if($stmInsert->execute()){
             //Return a 1 to indicate success
-            return 1;
+            //Should return a resource representation
+            $this->getIDFromName();
+            return true;
         }
 
         //Something went wrong with the insert
-        return -1;
+        return false;
     }
 
     public function updateBrand($newBrandName){
         //Get DB connection
         $db = dbConnection::getInstance();
 
-        //Write update statement
+        //Prep update statement
         $updateStm = $db->prepare('UPDATE `Brand` SET `brandName`=:newBrandName WHERE `brandName` = :oldBrandName');
 
         //Bind params
@@ -144,6 +145,27 @@ class Brand implements \JsonSerializable
         //Execute
         //Return success or failure
         if($updateStm->execute()){
+            $this->setBrandName($newBrandName);
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public function deleteBrand(){
+        //Get DB connection
+        $db = dbConnection::getInstance();
+
+        //Prep update statement
+        $deleteStm = $db->prepare('UPDATE `Brand` SET `isActive`= 0 WHERE `brandID` = :brandID');
+
+        //Bind params
+        $deleteStm->bindParam('brandID', $this->brandID);
+
+        //Execute
+        //Return success or failure
+        if($deleteStm->execute()){
             return 1;
         }
         else{
@@ -179,5 +201,24 @@ class Brand implements \JsonSerializable
         $stmSelect->execute();
         $results = $stmSelect->fetch();
         return $results;
+    }
+    private function getIDFromName(){
+        $db = dbConnection::getInstance();
+
+        $stmSelect = $db->prepare('SELECT * FROM `Brand` WHERE `brandName` LIKE :brandName');
+
+        $stmSelect->bindParam('brandName', $this->brandName);
+
+        $stmSelect->setFetchMode(\PDO::FETCH_ASSOC);
+
+        //Execute
+        $stmSelect->execute();
+
+        //Fetch results
+        $results = $stmSelect->fetch();
+
+        if ($results) {
+            $this->brandID = $results['brandID'];
+        }
     }
 }
