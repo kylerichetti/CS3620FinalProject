@@ -33,6 +33,29 @@ class BowlingBall implements \JsonSerializable
             $this->bowlingBallCoverstock = new Coverstock();
         }
     }
+    public function getBowlingBallID(){
+        return $this->bowlingBallID;
+    }
+    public function setIDFromName(){
+        $db = dbConnection::getInstance();
+
+        $stmSelect = $db->prepare('SELECT * FROM `BowlingBall` WHERE `bowlingBallName` LIKE :bowlingBallName');
+
+        $stmSelect->bindParam('bowlingBallName', $this->bowlingBallName);
+
+        $stmSelect->setFetchMode(\PDO::FETCH_ASSOC);
+
+        //Execute
+        $stmSelect->execute();
+
+        //Fetch results
+        $results = $stmSelect->fetch();
+
+        if ($results) {
+            $this->bowlingBallID = $results['bowlingBallID'];
+            $this->populate();
+        }
+    }
     public function getBowlingBallName()
     {
         return $this->bowlingBallName;
@@ -56,6 +79,22 @@ class BowlingBall implements \JsonSerializable
         $this->bowlingBallCoverstock = new Coverstock();
         $this->bowlingBallCoverstock->setCoverstockTypeName($coverstockName);
         return $this->bowlingBallCoverstock->setIDFromName();
+    }
+    public function setAtr($atr, $value){
+        switch($atr){
+            case "brandName":
+                $this->setBowlingBallBrand($value);
+                break;
+            case "bowlingBallName":
+                $this->setBowlingBallName($value);
+                break;
+            case "coreTypeName":
+                $this->setBowlingBallCore($value);
+                break;
+            case "coverstockTypeName":
+                $this->setBowlingBallCoverstock($value);
+                break;
+        }
     }
 
     public function JsonSerialize()
@@ -134,7 +173,6 @@ class BowlingBall implements \JsonSerializable
 
     }
     public function createBowlingBall(){
-        //TODO: Add error handling in case Brand, Core, or Coverstock is invalid
         $nameExists = $this->checkDatabaseForBowlingBallName(0);
         $db = dbConnection::getInstance();
         if($nameExists){
@@ -159,27 +197,37 @@ class BowlingBall implements \JsonSerializable
         //Execute
         if($stmInsert->execute()){
             //Return true to indicate success
-            $this->getIDFromName();
+            $this->setIDFromName();
             $this->populate();
             return true;
         }
         //Something went wrong with the insert
         return false;
     }
-    public function updateBowlingBall($newBowlingBallName){
+    public function updateBowlingBall(){
         //Get DB connection
         $db = dbConnection::getInstance();
 
         //Prep update statement
-        $updateStm = $db->prepare('UPDATE `BowlingBall` SET `bowlingBallName`=:newBowlingBallName WHERE `bowlingBallName` = :oldBowlingBallName');
+        $updateStm = $db->prepare('UPDATE `BowlingBall` 
+            SET `bowlingBallName`=:bowlingBallName, `brandID`=:brandID, `coreTypeID`=:coreTypeID, `coverstockTypeID`=:coverstockTypeID 
+            WHERE `bowlingBallID` = :bowlingBallID');
+
+        $brandID = $this->bowlingBallBrand->getBrandID();
+        $coreTypeID = $this->bowlingBallCore->getCoreTypeID();
+        $coverstockTypeID = $this->bowlingBallCoverstock->getCoverstockTypeID();
 
         //Bind params
-        $updateStm->bindParam('newBowlingBallName', $newBowlingBallName);
-        $updateStm->bindParam('oldBowlingBallName', $this->bowlingBallName);
+        $updateStm->bindParam('bowlingBallID', $this->bowlingBallID);
+        $updateStm->bindParam('bowlingBallName', $this->bowlingBallName);
+        $updateStm->bindParam('brandID', $brandID);
+        $updateStm->bindParam('coreTypeID', $coreTypeID);
+        $updateStm->bindParam('coverstockTypeID', $coverstockTypeID);
 
         //Execute and return success or failure
         if($updateStm->execute()){
-            $this->setBowlingBallName($newBowlingBallName);
+            //$this->setBowlingBallName($newBowlingBallName);
+            //$this->populate();
             return true;
         }
 
@@ -231,24 +279,5 @@ class BowlingBall implements \JsonSerializable
         $stmSelect->execute();
         $results = $stmSelect->fetch();
         return $results;
-    }
-    private function getIDFromName(){
-        $db = dbConnection::getInstance();
-
-        $stmSelect = $db->prepare('SELECT * FROM `BowlingBall` WHERE `bowlingBallName` LIKE :bowlingBallName');
-
-        $stmSelect->bindParam('bowlingBallName', $this->bowlingBallName);
-
-        $stmSelect->setFetchMode(\PDO::FETCH_ASSOC);
-
-        //Execute
-        $stmSelect->execute();
-
-        //Fetch results
-        $results = $stmSelect->fetch();
-
-        if ($results) {
-            $this->bowlingBallID = $results['bowlingBallID'];
-        }
     }
 }

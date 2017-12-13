@@ -190,7 +190,6 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
 
         return $val;
     };
-    //TODO: Update this function to use/require the correct data
     $createBowlingBall = function ($args)
     {
         $bowlingBallCtrl = new BowlingBallsController();
@@ -234,6 +233,9 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
         $bowlingBallCtrl = new BowlingBallsController();
 
         parse_str(file_get_contents('php://input'), $json);
+        foreach ($json as $key => $value){
+            $value = filter_var($value, FILTER_SANITIZE_STRING);
+        }
 
         return $bowlingBallCtrl->updateBowlingBall($args['id'], $json);
     };

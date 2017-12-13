@@ -106,9 +106,7 @@ class BowlingBallsController
         //Permissions test
         $role = Token::getRoleFromToken();
         if($role == Token::ROLE_ADMIN) {
-
             $bowlingBall = new BowlingBall($bowlingBallID);
-            $newBowlingBallName = $updatedBowlingBallData['bowlingBallName'];
 
             //Check if bowlingBall exists
             if ($bowlingBall->getBowlingBallName() == NULL) {
@@ -116,8 +114,13 @@ class BowlingBallsController
                 die("BowlingBall not found");
             }
 
+            //Update model
+            foreach ($updatedBowlingBallData as $atr => $value){
+                $bowlingBall->setAtr($atr, $value);
+            }
+
             //Update database
-            if ($bowlingBall->updateBowlingBall($newBowlingBallName)) {
+            if ($bowlingBall->updateBowlingBall()) {
                 return $bowlingBall->JsonSerialize();
             }
             else {
