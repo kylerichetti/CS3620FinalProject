@@ -109,7 +109,7 @@ class BowlingBall implements \JsonSerializable
 
         return $json;
     }
-    public function populate()
+    private function populate()
     {
         $db = dbConnection::getInstance();
         //Build database query
