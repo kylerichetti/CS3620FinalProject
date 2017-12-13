@@ -56,27 +56,10 @@ class BowlingBallsController
         $role = Token::getRoleFromToken();
         if($role == Token::ROLE_ADMIN) {
             $bowlingBall = new BowlingBall();
-            $newBowlingBallName = $newBowlingBallData['bowlingBallName'];
 
-            //Set name of the new bowlingBall
-            $bowlingBall->setBowlingBallName($newBowlingBallName);
-
-            //Check if Brand name given is invalid while attempting to set it
-            if(!$bowlingBall->setBowlingBallBrand($newBowlingBallData['brandName'])){
-                http_response_code(StatusCodes::BAD_REQUEST);
-                die("Invalid Brand");
-            }
-
-            //Check if Core Type name given is invalid while attempting to set it
-            if(!$bowlingBall->setBowlingBallCore($newBowlingBallData['coreTypeName'])){
-                http_response_code(StatusCodes::BAD_REQUEST);
-                die("Invalid Core Type");
-            }
-
-            //Check if Core Type name given is invalid while attempting to set it
-            if(!$bowlingBall->setBowlingBallCoverstock($newBowlingBallData['coverstockTypeName'])){
-                http_response_code(StatusCodes::BAD_REQUEST);
-                die("Invalid Coverstock Type");
+            //Set attributes of model
+            foreach ($newBowlingBallData as $atr => $value){
+                $bowlingBall->setAtr($atr, $value);
             }
 
             //Try to insert new bowlingBall into database

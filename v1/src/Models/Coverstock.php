@@ -57,6 +57,13 @@ class Coverstock implements \JsonSerializable
         //$this->coverstockTypeName = filter_var($name, FILTER_SANITIZE_STRING);
         $this->coverstockTypeName = $name;
     }
+    public function setAtr($atr, $value){
+        switch($atr){
+            case "coverstockTypeName":
+                $this->setCoverstockTypeName($value);
+                break;
+        }
+    }
 
     public function JsonSerialize()
     {

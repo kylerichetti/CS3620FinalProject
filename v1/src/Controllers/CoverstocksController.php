@@ -56,10 +56,11 @@ class CoverstocksController
         $role = Token::getRoleFromToken();
         if($role == Token::ROLE_ADMIN) {
             $coverstock = new Coverstock();
-            $newCoverstockName = $newCoverstockData['coverstockTypeName'];
 
             //Set name of the new coverstock
-            $coverstock->setCoverstockTypeName($newCoverstockName);
+            foreach ($newCoverstockData as $atr => $value){
+                $coverstock->setAtr($atr, $value);
+            }
 
             //Try to insert new coverstock into database
             if ($coverstock->createCoverstock()) {
@@ -90,7 +91,6 @@ class CoverstocksController
         if($role == Token::ROLE_ADMIN) {
 
             $coverstock = new Coverstock($coverstockTypeID);
-            $newCoverstockName = $updatedCoverstockData['coverstockTypeName'];
 
             //Check if coverstock exists
             if ($coverstock->getCoverstockTypeName() == NULL) {
@@ -99,7 +99,9 @@ class CoverstocksController
             }
 
             //Update model
-            $coverstock->setCoverstockTypeName($updatedCoverstockData['coverstockTypeName']);
+            foreach ($updatedCoverstockData as $atr => $value){
+                $coverstock->setAtr($atr, $value);
+            }
 
             //Update database
             if ($coverstock->updateCoverstock()) {

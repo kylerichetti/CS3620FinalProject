@@ -57,6 +57,13 @@ class Core implements \JsonSerializable
         //$this->coreTypeName = filter_var($name, FILTER_SANITIZE_STRING);
         $this->coreTypeName = $name;
     }
+    public function setAtr($atr, $value){
+        switch($atr){
+            case "coreTypeName":
+                $this->setCoreTypeName($value);
+                break;
+        }
+    }
 
     public function JsonSerialize()
     {

@@ -57,6 +57,13 @@ class Brand implements \JsonSerializable
         //$this->brandName = filter_var($name, FILTER_SANITIZE_STRING);
         $this->brandName = $name;
     }
+    public function setAtr($atr, $value){
+        switch($atr){
+            case "brandName":
+                $this->setBrandName($value);
+                break;
+        }
+    }
 
     public function JsonSerialize()
     {

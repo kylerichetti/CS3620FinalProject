@@ -58,16 +58,21 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $createBrand = function ($args)
     {
         $brandCtrl = new BrandsController();
-        $json = array();
+        $data = array();
         if (!empty($_POST['brandName'])) {
-            $json['brandName'] = filter_var($_POST['brandName'], FILTER_SANITIZE_STRING);
+            $data['brandName'] = filter_var($_POST['brandName'], FILTER_SANITIZE_STRING);
         }
         else{
-            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
-            die("Error: No body in POST");
+            //Attempt to parse json input
+            $json = (object) json_decode(file_get_contents('php://input'));
+            if (count((array)$json) >= 1) {
+                $data['brandName'] = filter_var($json->brandName, FILTER_SANITIZE_STRING);
+            } else {
+                http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+                exit();
+            }
         }
-
-        return $brandCtrl->createBrand($json);
+        return $brandCtrl->createBrand($data);
     };
     $updateBrand = function($args)
     {
@@ -76,7 +81,7 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
         parse_str(file_get_contents('php://input'), $json);
 
         return $brandCtrl->updateBrand($args['id'], $json);
-    };
+    }; //Add JSON parsing
     $deleteBrand = function($args)
     {
         $brandCtrl = new BrandsController();

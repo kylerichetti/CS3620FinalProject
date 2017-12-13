@@ -56,10 +56,11 @@ class CoresController
         $role = Token::getRoleFromToken();
         if($role == Token::ROLE_ADMIN) {
             $core = new Core();
-            $newCoreName = $newCoreData['coreTypeName'];
 
             //Set name of the new core
-            $core->setCoreTypeName($newCoreName);
+            foreach ($newCoreData as $atr => $value){
+                $core->setAtr($atr, $value);
+            }
 
             //Try to insert new core into database
             if ($core->createCore()) {
@@ -90,7 +91,6 @@ class CoresController
         if($role == Token::ROLE_ADMIN) {
 
             $core = new Core($coreTypeID);
-            $newCoreName = $updatedCoreData['coreTypeName'];
 
             //Check if core exists
             if ($core->getCoreTypeName() == NULL) {
@@ -99,7 +99,9 @@ class CoresController
             }
 
             //Update model
-            $core->setCoreTypeName($updatedCoreData['coreTypeName']);
+            foreach ($updatedCoreData as $atr => $value){
+                $core->setAtr($atr, $value);
+            }
 
             //Update database
             if ($core->updateCore()) {

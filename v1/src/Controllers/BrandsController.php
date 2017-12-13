@@ -56,10 +56,11 @@ class BrandsController
         $role = Token::getRoleFromToken();
         if($role == Token::ROLE_ADMIN) {
             $brand = new Brand();
-            $newBrandName = $newBrandData['brandName'];
 
-            //Set name of the new brand
-            $brand->setBrandName($newBrandName);
+            //Set attributes of the new brand
+            foreach ($newBrandData as $atr => $value){
+                $brand->setAtr($atr, $value);
+            }
 
             //Try to insert new brand into database
             if ($brand->createBrand()) {
@@ -98,7 +99,9 @@ class BrandsController
             }
 
             //Update model
-            $brand->setBrandName($updatedBrandData['brandName']);
+            foreach ($updatedBrandData as $atr => $value){
+                $brand->setAtr($atr, $value);
+            }
 
             //Update database
             if ($brand->updateBrand()) {

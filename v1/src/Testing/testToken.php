@@ -1,29 +1,29 @@
 <?php
 
-namespace Scholarship\Testing;
+namespace BowlingBall\Testing;
 
-use Scholarship\Controllers\TokensController;
-use Scholarship\Models\Token;
-use Scholarship\Http\Methods;
-use Scholarship\Utilities\Testing;
+use BowlingBall\Controllers\TokensController;
+use BowlingBall\Models\Token;
+use BowlingBall\Http\Methods;
+use BowlingBall\Utilities\Testing;
 use \PHPUnit\Framework\TestCase;
 
 
 class TokenTest extends TestCase {
-    public function testPostAsStudent()
+    public function testPostAsDeveloper()
     {
-        $token = $this->generateToken('generic', 'Hello357');
+        $token = $this->generateToken('genericDev', 'Dev');
 
         $this->assertNotNull($token);
-        $this->assertEquals(Token::ROLE_STUDENT, Token::getRoleFromToken($token));
+        $this->assertEquals(Token::ROLE_DEV, Token::getRoleFromToken($token));
     }
 
-    public function testPostAsFaculty()
+    public function testPostAsAdmin()
     {
-        $token = $this->generateToken('genericfac', 'Hello896');
+        $token = $this->generateToken('genericAdmin', 'Admin');
 
         $this->assertNotNull($token);
-        $this->assertEquals(Token::ROLE_FACULTY, Token::getRoleFromToken($token));
+        $this->assertEquals(Token::ROLE_ADMIN, Token::getRoleFromToken($token));
     }
 
     private function generateToken($username, $password)
@@ -35,7 +35,7 @@ class TokenTest extends TestCase {
     public function testCurl()
     {
         $token = "";
-        $body_contents = array("username"=>"genericfac", "password"=>"Hello896");
+        $body_contents = array("username"=>"genericAdmin", "password"=>"Admin");
         $body = json_encode($body_contents);
         $endpoint = "/tokens";
 
