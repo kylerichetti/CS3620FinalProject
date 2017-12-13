@@ -22,6 +22,32 @@ class Brand implements \JsonSerializable
             $this->populate();
         }
     }
+    public function getBrandID(){
+        return $this->brandID;
+    }
+    public function setIDFromName(){
+        $db = dbConnection::getInstance();
+
+        $stmSelect = $db->prepare('SELECT * FROM `Brand` WHERE `brandName` LIKE :brandName');
+
+        $stmSelect->bindParam('brandName', $this->brandName);
+
+        $stmSelect->setFetchMode(\PDO::FETCH_ASSOC);
+
+        //Execute
+        $stmSelect->execute();
+
+        //Fetch results
+        $results = $stmSelect->fetch();
+
+        if ($results) {
+            $this->brandID = $results['brandID'];
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
     public function getBrandName()
     {
         return $this->brandName;
@@ -90,8 +116,7 @@ class Brand implements \JsonSerializable
         $brandArray = array();
         //Fetch results
         while($results = $stmSelect->fetch()){
-            $brand = new Brand();
-            $brand->setIDAndName($results['brandID'], $results['brandName']);
+            $brand = new Brand($results['brandID']);
             array_push($brandArray, $brand);
         }
 
@@ -119,7 +144,7 @@ class Brand implements \JsonSerializable
         //Execute
         if($stmInsert->execute()){
             //Return true to indicate success
-            $this->getIDFromName();
+            $this->setIDFromName();
             return true;
         }
         //Something went wrong with the insert
@@ -162,10 +187,6 @@ class Brand implements \JsonSerializable
         return false;
     }
 
-    private function setIDAndName($brandID, $brandName){
-        $this->brandID = $brandID;
-        $this->brandName = $brandName;
-    }
     private function checkDatabaseForBrandName(bool $isActive){
         $db = dbConnection::getInstance();
         //Param decides if we only want brands that are active or all brands
@@ -194,24 +215,5 @@ class Brand implements \JsonSerializable
         $stmSelect->execute();
         $results = $stmSelect->fetch();
         return $results;
-    }
-    private function getIDFromName(){
-        $db = dbConnection::getInstance();
-
-        $stmSelect = $db->prepare('SELECT * FROM `Brand` WHERE `brandName` LIKE :brandName');
-
-        $stmSelect->bindParam('brandName', $this->brandName);
-
-        $stmSelect->setFetchMode(\PDO::FETCH_ASSOC);
-
-        //Execute
-        $stmSelect->execute();
-
-        //Fetch results
-        $results = $stmSelect->fetch();
-
-        if ($results) {
-            $this->brandID = $results['brandID'];
-        }
     }
 }

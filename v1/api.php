@@ -12,6 +12,7 @@ use \BowlingBall\Http\Methods as Methods;
 use \BowlingBall\Controllers\BrandsController as BrandsController;
 use \BowlingBall\Controllers\CoresController as CoresController;
 use \BowlingBall\Controllers\CoverstocksController as CoverstocksController;
+use \BowlingBall\Controllers\BowlingBallsController as BowlingBallsController;
 
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  use ($baseURI) {
@@ -172,6 +173,76 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
         return $coverstockCtrl->deleteCoverstock($args['id']);
     };
 
+    /*BowlingBall Closures*/
+    $getAllBowlingBalls = function ($args)
+    {
+        $bowlingBallCtrl = new BowlingBallsController();
+
+        $val = $bowlingBallCtrl->getAllBowlingBalls();
+
+        return $val;
+    };
+    $getBowlingBallByID = function ($args)
+    {
+        $bowlingBallCtrl = new BowlingBallsController();
+
+        $val = $bowlingBallCtrl->getBowlingBallByID($args['id']);
+
+        return $val;
+    };
+    //TODO: Update this function to use/require the correct data
+    $createBowlingBall = function ($args)
+    {
+        $bowlingBallCtrl = new BowlingBallsController();
+        $json = array();
+        if (!empty($_POST['bowlingBallName'])) {
+            $json['bowlingBallName'] = filter_var($_POST['bowlingBallName'], FILTER_SANITIZE_STRING);
+        }
+        else{
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            die("Error: No ball name in POST");
+        }
+
+        if (!empty($_POST['brandName'])) {
+            $json['brandName'] = filter_var($_POST['brandName'], FILTER_SANITIZE_STRING);
+        }
+        else{
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            die("Error: No brand name in POST");
+        }
+
+        if (!empty($_POST['coreTypeName'])) {
+            $json['coreTypeName'] = filter_var($_POST['coreTypeName'], FILTER_SANITIZE_STRING);
+        }
+        else{
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            die("Error: No core type in POST");
+        }
+
+        if (!empty($_POST['coverstockTypeName'])) {
+            $json['coverstockTypeName'] = filter_var($_POST['coverstockTypeName'], FILTER_SANITIZE_STRING);
+        }
+        else{
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            die("Error: No coverstock  type in POST");
+        }
+
+        return $bowlingBallCtrl->createBowlingBall($json);
+    };
+    $updateBowlingBall = function($args)
+    {
+        $bowlingBallCtrl = new BowlingBallsController();
+
+        parse_str(file_get_contents('php://input'), $json);
+
+        return $bowlingBallCtrl->updateBowlingBall($args['id'], $json);
+    };
+    $deleteBowlingBall = function($args)
+    {
+        $bowlingBallCtrl = new BowlingBallsController();
+        return $bowlingBallCtrl->deleteBowlingBall($args['id']);
+    };
+
     /*Routes*/
 
     /*Token Routes*/
@@ -197,6 +268,13 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $r->addRoute(Methods::POST, $baseURI . '/coverstocks', $createCoverstock);
     $r->addRoute(Methods::PATCH, $baseURI . '/coverstocks/{id:\d+}', $updateCoverstock);
     $r->addRoute(Methods::DELETE, $baseURI . '/coverstocks/{id:\d+}', $deleteCoverstock);
+
+    /*BowlingBall Routes*/
+    $r->addRoute(Methods::GET, $baseURI . '/bowlingBalls', $getAllBowlingBalls);
+    $r->addRoute(Methods::GET, $baseURI . '/bowlingBalls/{id:\d+}', $getBowlingBallByID);
+    $r->addRoute(Methods::POST, $baseURI . '/bowlingBalls', $createBowlingBall);
+    $r->addRoute(Methods::PATCH, $baseURI . '/bowlingBalls/{id:\d+}', $updateBowlingBall);
+    $r->addRoute(Methods::DELETE, $baseURI . '/bowlingBalls/{id:\d+}', $deleteBowlingBall);
 
 });
 

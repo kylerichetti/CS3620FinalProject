@@ -22,6 +22,32 @@ class Core implements \JsonSerializable
             $this->populate();
         }
     }
+    public function getCoreTypeID(){
+        return $this->coreTypeID;
+    }
+    public function setIDFromName(){
+        $db = dbConnection::getInstance();
+
+        $stmSelect = $db->prepare('SELECT * FROM `CoreType` WHERE `coreTypeName` LIKE :coreTypeName');
+
+        $stmSelect->bindParam('coreTypeName', $this->coreTypeName);
+
+        $stmSelect->setFetchMode(\PDO::FETCH_ASSOC);
+
+        //Execute
+        $stmSelect->execute();
+
+        //Fetch results
+        $results = $stmSelect->fetch();
+
+        if ($results) {
+            $this->coreTypeID = $results['coreTypeID'];
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
     public function getCoreTypeName()
     {
         return $this->coreTypeName;
@@ -90,8 +116,7 @@ class Core implements \JsonSerializable
         $coreArray = array();
         //Fetch results
         while($results = $stmSelect->fetch()){
-            $core = new Core();
-            $core->setIDAndName($results['coreTypeID'], $results['coreTypeName']);
+            $core = new Core($results['coreTypeID']);
             array_push($coreArray, $core);
         }
 
@@ -119,7 +144,7 @@ class Core implements \JsonSerializable
         //Execute
         if($stmInsert->execute()){
             //Return true to indicate success
-            $this->getIDFromName();
+            $this->setIDFromName();
             return true;
         }
         //Something went wrong with the insert
@@ -161,11 +186,7 @@ class Core implements \JsonSerializable
         }
         return false;
     }
-
-    private function setIDAndName($coreTypeID, $coreTypeName){
-        $this->coreTypeID = $coreTypeID;
-        $this->coreTypeName = $coreTypeName;
-    }
+    
     private function checkDatabaseForCoreName(bool $isActive){
         $db = dbConnection::getInstance();
         //Param decides if we only want cores that are active or all cores
@@ -194,24 +215,5 @@ class Core implements \JsonSerializable
         $stmSelect->execute();
         $results = $stmSelect->fetch();
         return $results;
-    }
-    private function getIDFromName(){
-        $db = dbConnection::getInstance();
-
-        $stmSelect = $db->prepare('SELECT * FROM `CoreType` WHERE `coreTypeName` LIKE :coreTypeName');
-
-        $stmSelect->bindParam('coreTypeName', $this->coreTypeName);
-
-        $stmSelect->setFetchMode(\PDO::FETCH_ASSOC);
-
-        //Execute
-        $stmSelect->execute();
-
-        //Fetch results
-        $results = $stmSelect->fetch();
-
-        if ($results) {
-            $this->coreTypeID = $results['coreTypeID'];
-        }
     }
 }

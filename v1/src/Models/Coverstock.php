@@ -22,6 +22,32 @@ class Coverstock implements \JsonSerializable
             $this->populate();
         }
     }
+    public function getCoverstockTypeID(){
+        return $this->coverstockTypeID;
+    }
+    public function setIDFromName(){
+        $db = dbConnection::getInstance();
+
+        $stmSelect = $db->prepare('SELECT * FROM `CoverstockType` WHERE `coverstockTypeName` LIKE :coverstockTypeName');
+
+        $stmSelect->bindParam('coverstockTypeName', $this->coverstockTypeName);
+
+        $stmSelect->setFetchMode(\PDO::FETCH_ASSOC);
+
+        //Execute
+        $stmSelect->execute();
+
+        //Fetch results
+        $results = $stmSelect->fetch();
+
+        if ($results) {
+            $this->coverstockTypeID = $results['coverstockTypeID'];
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
     public function getCoverstockTypeName()
     {
         return $this->coverstockTypeName;
@@ -90,8 +116,7 @@ class Coverstock implements \JsonSerializable
         $coverstockArray = array();
         //Fetch results
         while($results = $stmSelect->fetch()){
-            $coverstock = new Coverstock();
-            $coverstock->setIDAndName($results['coverstockTypeID'], $results['coverstockTypeName']);
+            $coverstock = new Coverstock($results['coverstockTypeID']);
             array_push($coverstockArray, $coverstock);
         }
 
@@ -119,7 +144,7 @@ class Coverstock implements \JsonSerializable
         //Execute
         if($stmInsert->execute()){
             //Return true to indicate success
-            $this->getIDFromName();
+            $this->setIDFromName();
             return true;
         }
         //Something went wrong with the insert
@@ -162,10 +187,6 @@ class Coverstock implements \JsonSerializable
         return false;
     }
 
-    private function setIDAndName($coverstockTypeID, $coverstockTypeName){
-        $this->coverstockTypeID = $coverstockTypeID;
-        $this->coverstockTypeName = $coverstockTypeName;
-    }
     private function checkDatabaseForCoverstockName(bool $isActive){
         $db = dbConnection::getInstance();
         //Param decides if we only want coverstocks that are active or all coverstocks
@@ -194,24 +215,5 @@ class Coverstock implements \JsonSerializable
         $stmSelect->execute();
         $results = $stmSelect->fetch();
         return $results;
-    }
-    private function getIDFromName(){
-        $db = dbConnection::getInstance();
-
-        $stmSelect = $db->prepare('SELECT * FROM `CoverstockType` WHERE `coverstockTypeName` LIKE :coverstockTypeName');
-
-        $stmSelect->bindParam('coverstockTypeName', $this->coverstockTypeName);
-
-        $stmSelect->setFetchMode(\PDO::FETCH_ASSOC);
-
-        //Execute
-        $stmSelect->execute();
-
-        //Fetch results
-        $results = $stmSelect->fetch();
-
-        if ($results) {
-            $this->coverstockTypeID = $results['coverstockTypeID'];
-        }
     }
 }
