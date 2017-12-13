@@ -90,7 +90,6 @@ class BrandsController
         if($role == Token::ROLE_ADMIN) {
 
             $brand = new Brand($brandID);
-            $newBrandName = $updatedBrandData['brandName'];
 
             //Check if brand exists
             if ($brand->getBrandName() == NULL) {
@@ -98,8 +97,11 @@ class BrandsController
                 die("Brand not found");
             }
 
+            //Update model
+            $brand->setBrandName($updatedBrandData['brandName']);
+
             //Update database
-            if ($brand->updateBrand($newBrandName)) {
+            if ($brand->updateBrand()) {
                 return $brand->JsonSerialize();
             }
             else {

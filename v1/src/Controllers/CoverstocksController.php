@@ -98,8 +98,11 @@ class CoverstocksController
                 die("Coverstock not found");
             }
 
+            //Update model
+            $coverstock->setCoverstockTypeName($updatedCoverstockData['coverstockTypeName']);
+
             //Update database
-            if ($coverstock->updateCoverstock($newCoverstockName)) {
+            if ($coverstock->updateCoverstock()) {
                 return $coverstock->JsonSerialize();
             }
             else {

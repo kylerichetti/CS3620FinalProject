@@ -98,8 +98,11 @@ class CoresController
                 die("Core not found");
             }
 
+            //Update model
+            $core->setCoreTypeName($updatedCoreData['coreTypeName']);
+
             //Update database
-            if ($core->updateCore($newCoreName)) {
+            if ($core->updateCore()) {
                 return $core->JsonSerialize();
             }
             else {

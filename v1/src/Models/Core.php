@@ -150,20 +150,19 @@ class Core implements \JsonSerializable
         //Something went wrong with the insert
         return false;
     }
-    public function updateCore($newCoreName){
+    public function updateCore(){
         //Get DB connection
         $db = dbConnection::getInstance();
 
         //Prep update statement
-        $updateStm = $db->prepare('UPDATE `CoreType` SET `coreTypeName`=:newCoreName WHERE `coreTypeName` = :oldCoreName');
+        $updateStm = $db->prepare('UPDATE `CoreType` SET `coreTypeName`=:coreTypeName WHERE `coreTypeID` = :coreTypeID');
 
         //Bind params
-        $updateStm->bindParam('newCoreName', $newCoreName);
-        $updateStm->bindParam('oldCoreName', $this->coreTypeName);
+        $updateStm->bindParam('coreTypeName', $this->coreTypeName);
+        $updateStm->bindParam('coreTypeID', $this->coreTypeID);
 
         //Execute and return success or failure
         if($updateStm->execute()){
-            $this->setCoreTypeName($newCoreName);
             return true;
         }
 

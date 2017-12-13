@@ -150,20 +150,19 @@ class Coverstock implements \JsonSerializable
         //Something went wrong with the insert
         return false;
     }
-    public function updateCoverstock($newCoverstockName){
+    public function updateCoverstock(){
         //Get DB connection
         $db = dbConnection::getInstance();
 
         //Prep update statement
-        $updateStm = $db->prepare('UPDATE `CoverstockType` SET `coverstockTypeName`=:newCoverstockName WHERE `coverstockTypeName` = :oldCoverstockName');
+        $updateStm = $db->prepare('UPDATE `CoverstockType` SET `coverstockTypeName`=:coverstockTypeName WHERE `coverstockTypeID` = :coverstockTypeID');
 
         //Bind params
-        $updateStm->bindParam('newCoverstockName', $newCoverstockName);
-        $updateStm->bindParam('oldCoverstockName', $this->coverstockTypeName);
+        $updateStm->bindParam('coverstockTypeName', $this->coverstockTypeName);
+        $updateStm->bindParam('coverstockTypeID', $this->coverstockTypeID);
 
         //Execute and return success or failure
         if($updateStm->execute()){
-            $this->setCoverstockTypeName($newCoverstockName);
             return true;
         }
 

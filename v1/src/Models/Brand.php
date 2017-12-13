@@ -150,20 +150,19 @@ class Brand implements \JsonSerializable
         //Something went wrong with the insert
         return false;
     }
-    public function updateBrand($newBrandName){
+    public function updateBrand(){
         //Get DB connection
         $db = dbConnection::getInstance();
 
         //Prep update statement
-        $updateStm = $db->prepare('UPDATE `Brand` SET `brandName`=:newBrandName WHERE `brandName` = :oldBrandName');
+        $updateStm = $db->prepare('UPDATE `Brand` SET `brandName`=:brandName WHERE `brandID` = :brandID');
 
         //Bind params
-        $updateStm->bindParam('newBrandName', $newBrandName);
-        $updateStm->bindParam('oldBrandName', $this->brandName);
+        $updateStm->bindParam('brandName', $this->brandName);
+        $updateStm->bindParam('brandID', $this->brandID);
 
         //Execute and return success or failure
         if($updateStm->execute()){
-            $this->setBrandName($newBrandName);
             return true;
         }
 
