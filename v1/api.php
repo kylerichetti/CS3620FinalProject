@@ -77,11 +77,18 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $updateBrand = function($args)
     {
         $brandCtrl = new BrandsController();
+        $data = array();
+        //Attempt to parse json input
+        $json = (object) json_decode(file_get_contents('php://input'));
+        if (count((array)$json) >= 1) {
+            $data['brandName'] = filter_var($json->brandName, FILTER_SANITIZE_STRING);
+        } else {
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            exit();
+        }
 
-        parse_str(file_get_contents('php://input'), $json);
-
-        return $brandCtrl->updateBrand($args['id'], $json);
-    }; //Add JSON parsing
+        return $brandCtrl->updateBrand($args['id'], $data);
+    };
     $deleteBrand = function($args)
     {
         $brandCtrl = new BrandsController();
@@ -108,24 +115,37 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $createCore = function ($args)
     {
         $coreCtrl = new CoresController();
-        $json = array();
+        $data = array();
         if (!empty($_POST['coreTypeName'])) {
-            $json['coreTypeName'] = filter_var($_POST['coreTypeName'], FILTER_SANITIZE_STRING);
+            $data['coreTypeName'] = filter_var($_POST['coreTypeName'], FILTER_SANITIZE_STRING);
         }
         else{
-            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
-            die("Error: No body in POST");
+            //Attempt to parse json input
+            $json = (object) json_decode(file_get_contents('php://input'));
+            if (count((array)$json) >= 1) {
+                $data['coreTypeName'] = filter_var($json->coreTypeName, FILTER_SANITIZE_STRING);
+            } else {
+                http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+                exit();
+            }
         }
 
-        return $coreCtrl->createCore($json);
+        return $coreCtrl->createCore($data);
     };
     $updateCore = function($args)
     {
         $coreCtrl = new CoresController();
+        $data = array();
+        //Attempt to parse json input
+        $json = (object) json_decode(file_get_contents('php://input'));
+        if (count((array)$json) >= 1) {
+            $data['coreTypeName'] = filter_var($json->coreTypeName, FILTER_SANITIZE_STRING);
+        } else {
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            exit();
+        }
 
-        parse_str(file_get_contents('php://input'), $json);
-
-        return $coreCtrl->updateCore($args['id'], $json);
+        return $coreCtrl->updateCore($args['id'], $data);
     };
     $deleteCore = function($args)
     {
@@ -153,24 +173,36 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $createCoverstock = function ($args)
     {
         $coverstockCtrl = new CoverstocksController();
-        $json = array();
+        $data = array();
         if (!empty($_POST['coverstockTypeName'])) {
-            $json['coverstockTypeName'] = filter_var($_POST['coverstockTypeName'], FILTER_SANITIZE_STRING);
+            $data['coverstockTypeName'] = filter_var($_POST['coverstockTypeName'], FILTER_SANITIZE_STRING);
         }
         else{
-            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
-            die("Error: No body in POST");
+            //Attempt to parse json input
+            $json = (object) json_decode(file_get_contents('php://input'));
+            if (count((array)$json) >= 1) {
+                $data['coverstockTypeName'] = filter_var($json->coverstockTypeName, FILTER_SANITIZE_STRING);
+            } else {
+                http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+                exit();
+            }
         }
-
-        return $coverstockCtrl->createCoverstock($json);
+        return $coverstockCtrl->createCoverstock($data);
     };
     $updateCoverstock = function($args)
     {
         $coverstockCtrl = new CoverstocksController();
+        $data = array();
+        //Attempt to parse json input
+        $json = (object) json_decode(file_get_contents('php://input'));
+        if (count((array)$json) >= 1) {
+           $data['coverstockTypeName'] = filter_var($json->coverstockTypeName, FILTER_SANITIZE_STRING);
+        } else {
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            exit();
+        }
 
-        parse_str(file_get_contents('php://input'), $json);
-
-        return $coverstockCtrl->updateCoverstock($args['id'], $json);
+        return $coverstockCtrl->updateCoverstock($args['id'], $data);
     };
     $deleteCoverstock = function($args)
     {
@@ -198,51 +230,53 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $createBowlingBall = function ($args)
     {
         $bowlingBallCtrl = new BowlingBallsController();
-        $json = array();
-        if (!empty($_POST['bowlingBallName'])) {
-            $json['bowlingBallName'] = filter_var($_POST['bowlingBallName'], FILTER_SANITIZE_STRING);
+        $data = array();
+        if (
+            !empty($_POST['bowlingBallName']) &&
+            !empty($_POST['brandName']) &&
+            !empty($_POST['coreTypeName']) &&
+            !empty($_POST['coverstockTypeName'])
+        )
+        {
+            $data['bowlingBallName'] = filter_var($_POST['bowlingBallName'], FILTER_SANITIZE_STRING);
+            $data['brandName'] = filter_var($_POST['brandName'], FILTER_SANITIZE_STRING);
+            $data['coreTypeName'] = filter_var($_POST['coreTypeName'], FILTER_SANITIZE_STRING);
+            $data['coverstockTypeName'] = filter_var($_POST['coverstockTypeName'], FILTER_SANITIZE_STRING);
         }
-        else{
-            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
-            die("Error: No ball name in POST");
-        }
-
-        if (!empty($_POST['brandName'])) {
-            $json['brandName'] = filter_var($_POST['brandName'], FILTER_SANITIZE_STRING);
-        }
-        else{
-            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
-            die("Error: No brand name in POST");
-        }
-
-        if (!empty($_POST['coreTypeName'])) {
-            $json['coreTypeName'] = filter_var($_POST['coreTypeName'], FILTER_SANITIZE_STRING);
-        }
-        else{
-            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
-            die("Error: No core type in POST");
-        }
-
-        if (!empty($_POST['coverstockTypeName'])) {
-            $json['coverstockTypeName'] = filter_var($_POST['coverstockTypeName'], FILTER_SANITIZE_STRING);
-        }
-        else{
-            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
-            die("Error: No coverstock  type in POST");
+        else
+        {
+            //Attempt to parse json input
+            $json = (object) json_decode(file_get_contents('php://input'));
+            if (count((array)$json) >= 4) {
+                $data['bowlingBallName'] = filter_var($json->bowlingBallName, FILTER_SANITIZE_STRING);
+                $data['brandName'] = filter_var($json->brandName, FILTER_SANITIZE_STRING);
+                $data['coreTypeName'] = filter_var($json->coreTypeName, FILTER_SANITIZE_STRING);
+                $data['coverstockTypeName'] = filter_var($json->coverstockTypeName, FILTER_SANITIZE_STRING);
+            } else {
+                http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+                exit();
+            }
         }
 
-        return $bowlingBallCtrl->createBowlingBall($json);
+        return $bowlingBallCtrl->createBowlingBall($data);
     };
     $updateBowlingBall = function($args)
     {
         $bowlingBallCtrl = new BowlingBallsController();
-
-        parse_str(file_get_contents('php://input'), $json);
-        foreach ($json as $key => $value){
-            $value = filter_var($value, FILTER_SANITIZE_STRING);
+        $data = array();
+        //Attempt to parse json input
+        $json = (object) json_decode(file_get_contents('php://input'));
+        if (count((array)$json) >= 4) {
+            $data['bowlingBallName'] = filter_var($json->bowlingBallName, FILTER_SANITIZE_STRING);
+            $data['brandName'] = filter_var($json->brandName, FILTER_SANITIZE_STRING);
+            $data['coreTypeName'] = filter_var($json->coreTypeName, FILTER_SANITIZE_STRING);
+            $data['coverstockTypeName'] = filter_var($json->coverstockTypeName, FILTER_SANITIZE_STRING);
+        } else {
+            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+            exit();
         }
 
-        return $bowlingBallCtrl->updateBowlingBall($args['id'], $json);
+        return $bowlingBallCtrl->updateBowlingBall($args['id'], $data);
     };
     $deleteBowlingBall = function($args)
     {
