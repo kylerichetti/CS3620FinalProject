@@ -15,9 +15,10 @@ use \BowlingBall\Models\Coverstock;
 class CoverstocksController
 {
     //Get all active coverstocks
-    public function getAllCoverstocks()
+    public function getAllCoverstocks($jwt = NULL)
     {
-        $role = Token::getRoleFromToken();
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $coverstocks = (new Coverstock())->getAllCoverstocks();
             if (!$coverstocks) {
@@ -34,8 +35,9 @@ class CoverstocksController
         }
     }
     //Get a single coverstock by ID
-    public function getCoverstockByID($coverstockTypeID){
-        $role = Token::getRoleFromToken();
+    public function getCoverstockByID($coverstockTypeID, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $coverstock = new Coverstock($coverstockTypeID);
 
@@ -52,14 +54,21 @@ class CoverstocksController
         }
     }
     //Create a coverstock
-    public function createCoverstock($newCoverstockData){
-        $role = Token::getRoleFromToken();
+    public function createCoverstock($newCoverstockData, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
             $coverstock = new Coverstock();
 
             //Set name of the new coverstock
             foreach ($newCoverstockData as $atr => $value){
-                $coverstock->setAtr($atr, $value);
+                if(!empty($atr) && !empty($value)) {
+                    $coverstock->setAtr($atr, $value);
+                }
+                else{
+                    http_response_code(StatusCodes::BAD_REQUEST);
+                    die("Invalid data in request body");
+                }
             }
 
             //Try to insert new coverstock into database
@@ -85,9 +94,10 @@ class CoverstocksController
         }
     }
     //Update a coverstock
-    public function updateCoverstock($coverstockTypeID, $updatedCoverstockData){
+    public function updateCoverstock($coverstockTypeID, $updatedCoverstockData, $jwt = NULL){
         //Permissions test
-        $role = Token::getRoleFromToken();
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
 
             $coverstock = new Coverstock($coverstockTypeID);
@@ -100,7 +110,13 @@ class CoverstocksController
 
             //Update model
             foreach ($updatedCoverstockData as $atr => $value){
-                $coverstock->setAtr($atr, $value);
+                if(!empty($atr) && !empty($value)) {
+                    $coverstock->setAtr($atr, $value);
+                }
+                else{
+                    http_response_code(StatusCodes::BAD_REQUEST);
+                    die("Invalid data in request body");
+                }
             }
 
             //Update database
@@ -124,9 +140,9 @@ class CoverstocksController
         }
     }
     //Soft delete a coverstock
-    public function deleteCoverstock($coverstockTypeID){
+    public function deleteCoverstock($coverstockTypeID, $jwt = NULL){
         //Permissions test
-        $role = Token::getRoleFromToken();
+        $role = $this->extractRoleFromToken($jwt);
         if($role == Token::ROLE_ADMIN) {
             $coverstock = new Coverstock($coverstockTypeID);
             if ($coverstock->deleteCoverstock()) {
@@ -148,5 +164,15 @@ class CoverstocksController
             http_response_code(StatusCodes::UNAUTHORIZED);
             die("No token provided");
         }
+    }
+
+    //Extract role
+    private function extractRoleFromToken($jwt = NULL){
+        try {
+            $role = Token::getRoleFromToken($jwt);
+        } catch (\Exception $err){
+            $role = NULL;
+        }
+        return $role;
     }
 }

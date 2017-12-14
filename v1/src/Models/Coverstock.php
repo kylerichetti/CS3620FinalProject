@@ -54,8 +54,9 @@ class Coverstock implements \JsonSerializable
     }
     public function setCoverstockTypeName($name){
         //Sanitize data
-        //$this->coverstockTypeName = filter_var($name, FILTER_SANITIZE_STRING);
-        $this->coverstockTypeName = $name;
+        if(!empty($name)) {
+            $this->coverstockTypeName = filter_var($name, FILTER_SANITIZE_STRING);;
+        }
     }
     public function setAtr($atr, $value){
         switch($atr){
@@ -74,7 +75,7 @@ class Coverstock implements \JsonSerializable
 
         return $json;
     }
-    private function populate()
+    public function populate()
     {
         $db = dbConnection::getInstance();
         //Build database query
