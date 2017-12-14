@@ -33,7 +33,7 @@ class TokensController
         }
         //Invalid username
         http_response_code(StatusCodes::UNAUTHORIZED);
-        die("Username and/or password incorrect");
+        exit("Username and/or password incorrect");
     }
 
 }

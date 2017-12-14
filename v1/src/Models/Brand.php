@@ -55,7 +55,8 @@ class Brand implements \JsonSerializable
     public function setBrandName($name){
         //Sanitize data
         //$this->brandName = filter_var($name, FILTER_SANITIZE_STRING);
-        $this->brandName = $name;
+        if(!empty($name))
+            $this->brandName = $name;
     }
     public function setAtr($atr, $value){
         switch($atr){
@@ -74,7 +75,7 @@ class Brand implements \JsonSerializable
 
         return $json;
     }
-    private function populate()
+    public function populate()
     {
         $db = dbConnection::getInstance();
         //Build database query

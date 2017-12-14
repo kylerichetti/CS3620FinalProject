@@ -11,13 +11,19 @@ namespace BowlingBall\Controllers;
 use \BowlingBall\Http\StatusCodes as StatusCodes;
 use \BowlingBall\Models\Token as Token;
 use \BowlingBall\Models\Brand;
+use TheSeer\Tokenizer\TokenCollectionException;
 
 class BrandsController
 {
     //Get all active brands
-    public function getAllBrands()
+    public function getAllBrands($jwt = NULL)
     {
-        $role = Token::getRoleFromToken();
+        try {
+            $role = Token::getRoleFromToken($jwt);
+        } catch (\Exception $err){
+            $role = NULL;
+        }
+
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $brands = (new Brand())->getAllBrands();
             if (!$brands) {
@@ -34,8 +40,13 @@ class BrandsController
         }
     }
     //Get a single brand by ID
-    public function getBrandByID($brandID){
-        $role = Token::getRoleFromToken();
+    public function getBrandByID($brandID, $jwt = NULL){
+        try {
+            $role = Token::getRoleFromToken($jwt);
+        } catch (\Exception $err){
+            $role = NULL;
+        }
+
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $brand = new Brand($brandID);
 
@@ -43,6 +54,7 @@ class BrandsController
                 http_response_code(StatusCodes::NOT_FOUND);
                 die("Brand not found");
             }
+            http_response_code(StatusCodes::OK);
             return $brand;
         }
         else{
@@ -52,14 +64,24 @@ class BrandsController
         }
     }
     //Create a brand
-    public function createBrand($newBrandData){
-        $role = Token::getRoleFromToken();
+    public function createBrand($newBrandData, $jwt = NULL){
+        try {
+            $role = Token::getRoleFromToken($jwt);
+        } catch (\Exception $err){
+            $role = NULL;
+        }
         if($role == Token::ROLE_ADMIN) {
             $brand = new Brand();
 
             //Set attributes of the new brand
             foreach ($newBrandData as $atr => $value){
-                $brand->setAtr($atr, $value);
+                if(!empty($atr) && !empty($value)) {
+                    $brand->setAtr($atr, $value);
+                }
+                else{
+                    http_response_code(StatusCodes::BAD_REQUEST);
+                    die("Invalid data in request body");
+                }
             }
 
             //Try to insert new brand into database
@@ -85,9 +107,13 @@ class BrandsController
         }
     }
     //Update a brand
-    public function updateBrand($brandID, $updatedBrandData){
+    public function updateBrand($brandID, $updatedBrandData, $jwt = NULL){
         //Permissions test
-        $role = Token::getRoleFromToken();
+        try {
+            $role = Token::getRoleFromToken($jwt);
+        } catch (\Exception $err){
+            $role = NULL;
+        }
         if($role == Token::ROLE_ADMIN) {
 
             $brand = new Brand($brandID);
@@ -100,7 +126,13 @@ class BrandsController
 
             //Update model
             foreach ($updatedBrandData as $atr => $value){
-                $brand->setAtr($atr, $value);
+                if(!empty($atr) && !empty($value)) {
+                    $brand->setAtr($atr, $value);
+                }
+                else{
+                    http_response_code(StatusCodes::BAD_REQUEST);
+                    die("Invalid data in request body");
+                }
             }
 
             //Update database
@@ -124,9 +156,13 @@ class BrandsController
         }
     }
     //Soft delete a brand
-    public function deleteBrand($brandID){
+    public function deleteBrand($brandID, $jwt = NULL){
         //Permissions test
-        $role = Token::getRoleFromToken();
+        try {
+            $role = Token::getRoleFromToken($jwt);
+        } catch (\Exception $err){
+            $role = NULL;
+        }
         if($role == Token::ROLE_ADMIN) {
             $brand = new Brand($brandID);
             if ($brand->deleteBrand()) {
@@ -149,4 +185,6 @@ class BrandsController
             die("No token provided");
         }
     }
+
+    //Extract t
 }
