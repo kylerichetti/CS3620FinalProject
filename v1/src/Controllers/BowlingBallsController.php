@@ -15,9 +15,9 @@ use \BowlingBall\Models\BowlingBall;
 class BowlingBallsController
 {
     //Get all active bowlingBalls
-    public function getAllBowlingBalls()
+    public function getAllBowlingBalls($jwt = NULL)
     {
-        $role = Token::getRoleFromToken();
+        $role = $this->extractRoleFromToken($jwt);
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $bowlingBalls = (new BowlingBall())->getAllBowlingBalls();
             if (!$bowlingBalls) {
@@ -34,8 +34,9 @@ class BowlingBallsController
         }
     }
     //Get a single bowlingBall by ID
-    public function getBowlingBallByID($bowlingBallID){
-        $role = Token::getRoleFromToken();
+    public function getBowlingBallByID($bowlingBallID, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $bowlingBall = new BowlingBall($bowlingBallID);
 
@@ -52,8 +53,9 @@ class BowlingBallsController
         }
     }
     //Create a bowlingBall
-    public function createBowlingBall($newBowlingBallData){
-        $role = Token::getRoleFromToken();
+    public function createBowlingBall($newBowlingBallData, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
             $bowlingBall = new BowlingBall();
 
@@ -85,9 +87,9 @@ class BowlingBallsController
         }
     }
     //Update a bowlingBall
-    public function updateBowlingBall($bowlingBallID, $updatedBowlingBallData){
-        //Permissions test
-        $role = Token::getRoleFromToken();
+    public function updateBowlingBall($bowlingBallID, $updatedBowlingBallData, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
             $bowlingBall = new BowlingBall($bowlingBallID);
 
@@ -101,7 +103,7 @@ class BowlingBallsController
             foreach ($updatedBowlingBallData as $atr => $value){
                 $bowlingBall->setAtr($atr, $value);
             }
-
+            //return $bowlingBall;
             //Update database
             if ($bowlingBall->updateBowlingBall()) {
                 return $bowlingBall->JsonSerialize();
@@ -123,9 +125,9 @@ class BowlingBallsController
         }
     }
     //Soft delete a bowlingBall
-    public function deleteBowlingBall($bowlingBallID){
-        //Permissions test
-        $role = Token::getRoleFromToken();
+    public function deleteBowlingBall($bowlingBallID, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
             $bowlingBall = new BowlingBall($bowlingBallID);
             if ($bowlingBall->deleteBowlingBall()) {
@@ -147,5 +149,14 @@ class BowlingBallsController
             http_response_code(StatusCodes::UNAUTHORIZED);
             die("No token provided");
         }
+    }
+
+    private function extractRoleFromToken($jwt = NULL){
+        try {
+            $role = Token::getRoleFromToken($jwt);
+        } catch (\Exception $err){
+            $role = NULL;
+        }
+        return $role;
     }
 }

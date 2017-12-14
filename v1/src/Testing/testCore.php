@@ -71,7 +71,7 @@ class testCore extends TestCase
     }
 
     //Admin token
-    public function testPostDevToken(){
+    public function testPostAdminToken(){
         $token = $this->generateToken("genericAdmin","Admin");
         $coreCtrl = new CoresController();
         $coreData = array();

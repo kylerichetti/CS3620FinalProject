@@ -71,7 +71,7 @@ class testCoverstock extends TestCase
     }
 
     //Admin token
-    public function testPostDevToken(){
+    public function testPostAdminToken(){
         $token = $this->generateToken("genericAdmin","Admin");
         $coverstockCtrl = new CoverstocksController();
         $coverstockData = array();

@@ -62,8 +62,8 @@ class BowlingBall implements \JsonSerializable
     }
     public function setBowlingBallName($name){
         //Sanitize data
-        //$this->bowlingBallName = filter_var($name, FILTER_SANITIZE_STRING);
-        $this->bowlingBallName = $name;
+        if(!empty($name))
+            $this->bowlingBallName = filter_var($name, FILTER_SANITIZE_STRING);
     }
     public function setBowlingBallBrand($brandName){
         $this->bowlingBallBrand = new Brand();
@@ -94,6 +94,8 @@ class BowlingBall implements \JsonSerializable
             case "coverstockTypeName":
                 $this->setBowlingBallCoverstock($value);
                 break;
+            default:
+                break;
         }
     }
 
@@ -109,7 +111,7 @@ class BowlingBall implements \JsonSerializable
 
         return $json;
     }
-    private function populate()
+    public function populate()
     {
         $db = dbConnection::getInstance();
         //Build database query
@@ -182,16 +184,19 @@ class BowlingBall implements \JsonSerializable
         else {
             //If not, insert new bowlingBall into database
             $stmInsert = $db->prepare('INSERT INTO `BowlingBall` (`bowlingBallName`, `brandID`, `coreTypeID`, `coverstockTypeID`, `isActive`) VALUES (:bowlingBallName, :brandID, :coreTypeID, :coverstockTypeID, 1)');
+
+            //Bind parameters
+            $brandID = $this->bowlingBallBrand->getBrandID();
+            $coreTypeID = $this->bowlingBallCore->getCoreTypeID();
+            $coverstockTypeID = $this->bowlingBallCoverstock->getCoverstockTypeID();
+
+            $stmInsert->bindParam(':brandID', $brandID);
+            $stmInsert->bindParam(':coreTypeID', $coreTypeID);
+            $stmInsert->bindParam(':coverstockTypeID', $coverstockTypeID);
         }
-        //Bind parameters
-        $brandID = $this->bowlingBallBrand->getBrandID();
-        $coreTypeID = $this->bowlingBallCore->getCoreTypeID();
-        $coverstockTypeID = $this->bowlingBallCoverstock->getCoverstockTypeID();
 
         $stmInsert->bindParam(':bowlingBallName', $this->bowlingBallName);
-        $stmInsert->bindParam(':brandID', $brandID);
-        $stmInsert->bindParam(':coreTypeID', $coreTypeID);
-        $stmInsert->bindParam(':coverstockTypeID', $coverstockTypeID);
+
 
 
         //Execute
@@ -216,6 +221,7 @@ class BowlingBall implements \JsonSerializable
         $brandID = $this->bowlingBallBrand->getBrandID();
         $coreTypeID = $this->bowlingBallCore->getCoreTypeID();
         $coverstockTypeID = $this->bowlingBallCoverstock->getCoverstockTypeID();
+        //return $this->bowlingBallBrand;
 
         //Bind params
         $updateStm->bindParam('bowlingBallID', $this->bowlingBallID);

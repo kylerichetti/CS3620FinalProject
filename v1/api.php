@@ -253,9 +253,17 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
                 $data['brandName'] = filter_var($json->brandName, FILTER_SANITIZE_STRING);
                 $data['coreTypeName'] = filter_var($json->coreTypeName, FILTER_SANITIZE_STRING);
                 $data['coverstockTypeName'] = filter_var($json->coverstockTypeName, FILTER_SANITIZE_STRING);
-            } else {
+            }
+            /*else {
                 http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
                 exit();
+            }*/
+
+            foreach ($data as $key => $value){
+                if(empty($key) || empty($value)){
+                    http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+                    exit("Invalid data in request body");
+                }
             }
         }
 
@@ -267,14 +275,30 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
         $data = array();
         //Attempt to parse json input
         $json = (object) json_decode(file_get_contents('php://input'));
-        if (count((array)$json) >= 4) {
-            $data['bowlingBallName'] = filter_var($json->bowlingBallName, FILTER_SANITIZE_STRING);
-            $data['brandName'] = filter_var($json->brandName, FILTER_SANITIZE_STRING);
-            $data['coreTypeName'] = filter_var($json->coreTypeName, FILTER_SANITIZE_STRING);
-            $data['coverstockTypeName'] = filter_var($json->coverstockTypeName, FILTER_SANITIZE_STRING);
-        } else {
-            http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
-            exit();
+        if (count((array)$json) >= 1) {
+
+            if(isset($json->bowlingBallName)) {
+                $data['bowlingBallName'] = filter_var($json->bowlingBallName, FILTER_SANITIZE_STRING);
+            }
+
+            if(isset($json->brandName)) {
+                $data['brandName'] = filter_var($json->brandName, FILTER_SANITIZE_STRING);
+            }
+
+            if(isset($json->coreTypeName)) {
+                $data['coreTypeName'] = filter_var($json->coreTypeName, FILTER_SANITIZE_STRING);
+            }
+
+            if(isset($json->coverstockTypeName)) {
+                $data['coverstockTypeName'] = filter_var($json->coverstockTypeName, FILTER_SANITIZE_STRING);
+            }
+        }
+
+        foreach ($data as $key => $value){
+            if(empty($key) || empty($value)){
+                http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
+                exit("Invalid data in request body");
+            }
         }
 
         return $bowlingBallCtrl->updateBowlingBall($args['id'], $data);
