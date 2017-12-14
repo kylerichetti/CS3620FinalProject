@@ -75,3 +75,4 @@ v1/.htaccess
 v1/composer.lock
 
 .idea
+*.sql
