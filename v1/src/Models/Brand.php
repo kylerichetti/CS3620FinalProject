@@ -54,7 +54,7 @@ class Brand implements \JsonSerializable
     }
     public function setBrandName($name){
         //Sanitize data
-        //$this->brandName = filter_var($name, FILTER_SANITIZE_STRING);
+        $name = filter_var($name, FILTER_SANITIZE_STRING);
         if(!empty($name))
             $this->brandName = $name;
     }

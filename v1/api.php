@@ -92,7 +92,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
     $deleteBrand = function($args)
     {
         $brandCtrl = new BrandsController();
-        return $brandCtrl->deleteBrand($args['id']);
+        return  $brandCtrl->deleteBrand($args['id']);
+
     };
 
     /*Core Closures*/

@@ -21,7 +21,7 @@ class testBrand extends TestCase
 {
     //Test POST
     //No token
-    //Causes an Apache error
+    //Commented out function causes an Apache error
     /*public function testPostNoToken(){
         $brandCtrl = new BrandsController();
         $newBrandData = array("brandName"=>"Unit Test Brand");
@@ -46,7 +46,14 @@ class testBrand extends TestCase
     }
 
     //Dev token
-    //Should be able to do without CURL
+    //Causes testing to stop
+    /*public function testPostDevToken(){
+        $token = $this->generateToken("genericDev","Dev");
+        $brandCtrl = new BrandsController();
+        $brandData = array();
+        $brandData['brandName'] = "Unit Test Brand";
+        $brandCtrl->createBrand($brandData, $token);
+    }*/
     public function testPostDevTokenCURL()
     {
         $token = $this->generateToken("genericDev", "Dev");
@@ -65,7 +72,19 @@ class testBrand extends TestCase
     }
 
     //Admin token
-    //Should be able to do without CURL
+    public function testPostDevToken(){
+        $token = $this->generateToken("genericAdmin","Admin");
+        $brandCtrl = new BrandsController();
+        $brandData = array();
+        $brandData['brandName'] = "Unit Test Brand";
+        $output = $brandCtrl->createBrand($brandData, $token);
+
+        $this->assertNotEquals("Insert failed", $output);
+        $this->assertEquals(1, $output['brandID']);
+        $this->assertEquals("Unit Test Brand", $output['brandName']);
+
+        $this->deleteTestBrand();
+    }
     public function testPostAdminTokenCURL()
     {
         $token = $this->generateToken("genericAdmin", "Admin");
@@ -272,7 +291,7 @@ class testBrand extends TestCase
         $this->assertEquals(StatusCodes::OK, Testing::getLastHTTPResponseCode());
     }
     //Test: Invalid Brand Number
-    //Causes the testing to exit
+    //Causes the testing to halt
     /*public function testGetOneInvalid(){
         $token = $this->generateToken("genericAdmin", "Admin");
         $brandCtrl = new BrandsController();
@@ -375,7 +394,7 @@ class testBrand extends TestCase
         $this->assertEquals("Invalid data in request body", $output);
         $this->assertEquals(StatusCodes::BAD_REQUEST, Testing::getLastHTTPResponseCode());
     }
-    public function testPatchInvalidBrandNumberCURL()
+    public function testPatchInvalidBrandIDCURL()
     {
         $token = $this->generateToken("genericAdmin", "Admin");
         $body_contents = array("brandName"=>"La de Dah");
@@ -393,17 +412,16 @@ class testBrand extends TestCase
         $this->assertEquals(StatusCodes::NOT_FOUND, Testing::getLastHTTPResponseCode());
     }
 
-/*
+
     //Test DELETE
+    //Test: No token
     public function testDeleteNoTokenCURL(){
         $token = "";
-        //$body_contents = array("username"=>"genericAdmin");
-        //$body = json_encode($body_contents);
         $body = "";
         $endpoint = "/brands/1";
 
         try {
-            $output = Testing::callAPIOverHTTP($endpoint, Methods::GET, $body, $token, Testing::JSON);
+            $output = Testing::callAPIOverHTTP($endpoint, Methods::DELETE, $body, $token, Testing::JSON);
         } catch (\Exception $err) {
             $this->assertEmpty($err->getMessage(), "Error message: ". $err->getMessage());
             $output = "API Call failed";
@@ -413,39 +431,40 @@ class testBrand extends TestCase
         $this->assertEquals("No token provided", $output);
     }
     //Test: Dev token
+    //Causes testing to halt
+    /*
     public function testDeleteDevToken(){
         $token = $this->generateToken("genericDev", "Dev");
         $brandCtrl = new BrandsController();
 
-        $output = $brandCtrl->getBrandByID(1, $token);
+        $output = $brandCtrl->deleteBrand(1, $token);
 
-        $this->assertNotEquals("Brand not found", $output, "Brand not found");
-        $this->assertNotEmpty($output, "Brand not found");
-    }
+        $this->assertEquals("Improper Role", $output, "Improper role failed to trigger");
+    }*/
     public function testDeleteDevTokenCURL(){
         $token = $this->generateToken("genericDev", "Dev");
         $body = "";
         $endpoint = "/brands/1";
 
         try {
-            $output = Testing::callAPIOverHTTP($endpoint, Methods::GET, $body, $token, Testing::JSON);
+            $output = Testing::callAPIOverHTTP($endpoint, Methods::DELETE, $body, $token, Testing::JSON);
         } catch (\Exception $err) {
             $this->assertEmpty($err->getMessage(), "Error message: ". $err->getMessage());
             $output = "No brands in database";
         }
 
-        $this->assertNotEquals("Brand not found", $output);
-        $this->assertEquals(StatusCodes::OK, Testing::getLastHTTPResponseCode());
+        $this->assertEquals("Improper Role", $output);
+        $this->assertEquals(StatusCodes::FORBIDDEN, Testing::getLastHTTPResponseCode());
     }
     //Test: Admin token
     public function testDeleteAdminToken(){
         $token = $this->generateToken("genericAdmin", "Admin");
         $brandCtrl = new BrandsController();
 
-        $output = $brandCtrl->getBrandByID(1, $token);
+        $output = $brandCtrl->deleteBrand(1, $token);
 
-        $this->assertNotEquals("Brand not found", $output, "Brand not found");
-        $this->assertNotEmpty($output, "Brand not found");
+        $this->assertEquals("Success", $output, "Delete failed");
+        $this->restoreDeleted();
     }
     public function testDeleteAdminTokenCURL(){
         $token = $this->generateToken("genericAdmin", "Admin");
@@ -453,16 +472,41 @@ class testBrand extends TestCase
         $endpoint = "/brands/1";
 
         try {
-            $output = Testing::callAPIOverHTTP($endpoint, Methods::GET, $body, $token, Testing::JSON);
+            $output = Testing::callAPIOverHTTP($endpoint, Methods::DELETE, $body, $token, Testing::JSON);
         } catch (\Exception $err) {
             $this->assertEmpty($err->getMessage(), "Error message: ". $err->getMessage());
             $output = "No brands in database";
         }
 
-        $this->assertNotEquals("Brand not found", $output);
+        $this->assertEquals('"Success"', $output);
         $this->assertEquals(StatusCodes::OK, Testing::getLastHTTPResponseCode());
     }
-/**/
+
+    public function testDeleteInvalidAdminToken(){
+        $token = $this->generateToken("genericAdmin", "Admin");
+        $brandCtrl = new BrandsController();
+
+        $output = $brandCtrl->deleteBrand(9000000, $token);
+
+        $this->assertEquals("Success", $output, "Delete failed");
+        $this->restoreDeleted();
+    }
+    public function testDeleteInvalidAdminTokenCURL(){
+        $token = $this->generateToken("genericAdmin", "Admin");
+        $body = "";
+        $endpoint = "/brands/9000000";
+
+        try {
+            $output = Testing::callAPIOverHTTP($endpoint, Methods::DELETE, $body, $token, Testing::JSON);
+        } catch (\Exception $err) {
+            $this->assertEmpty($err->getMessage(), "Error message: ". $err->getMessage());
+            $output = "No brands in database";
+        }
+
+        $this->assertEquals('"Success"', $output);
+        $this->assertEquals(StatusCodes::OK, Testing::getLastHTTPResponseCode());
+    }
+
     //Utility Functions
     private function generateToken($username, $password)
     {
@@ -480,5 +524,14 @@ class testBrand extends TestCase
         } catch (\Exception $err) {
             $this->assertEmpty($err->getMessage(), "Error message: ". $err->getMessage());
         }
+    }
+    private function restoreDeleted(){
+        $brand = new Brand();
+        $brand->setBrandName("Unit Test Brand");
+        $brand->createBrand();
+    }
+    private function deleteTestBrand(){
+        $brand = new Brand(1);
+        $brand->deleteBrand();
     }
 }
