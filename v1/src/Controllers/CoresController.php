@@ -15,9 +15,10 @@ use \BowlingBall\Models\Core;
 class CoresController
 {
     //Get all active cores
-    public function getAllCores()
+    public function getAllCores($jwt = NULL)
     {
-        $role = Token::getRoleFromToken();
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $cores = (new Core())->getAllCores();
             if (!$cores) {
@@ -34,8 +35,9 @@ class CoresController
         }
     }
     //Get a single core by ID
-    public function getCoreByID($coreTypeID){
-        $role = Token::getRoleFromToken();
+    public function getCoreByID($coreTypeID, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $core = new Core($coreTypeID);
 
@@ -52,14 +54,21 @@ class CoresController
         }
     }
     //Create a core
-    public function createCore($newCoreData){
-        $role = Token::getRoleFromToken();
+    public function createCore($newCoreData, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
             $core = new Core();
 
             //Set name of the new core
             foreach ($newCoreData as $atr => $value){
-                $core->setAtr($atr, $value);
+                if(!empty($atr) && !empty($value)) {
+                    $core->setAtr($atr, $value);
+                }
+                else{
+                    http_response_code(StatusCodes::BAD_REQUEST);
+                    die("Invalid data in request body");
+                }
             }
 
             //Try to insert new core into database
@@ -85,9 +94,9 @@ class CoresController
         }
     }
     //Update a core
-    public function updateCore($coreTypeID, $updatedCoreData){
-        //Permissions test
-        $role = Token::getRoleFromToken();
+    public function updateCore($coreTypeID, $updatedCoreData, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
 
             $core = new Core($coreTypeID);
@@ -100,7 +109,13 @@ class CoresController
 
             //Update model
             foreach ($updatedCoreData as $atr => $value){
-                $core->setAtr($atr, $value);
+                if(!empty($atr) && !empty($value)) {
+                    $core->setAtr($atr, $value);
+                }
+                else{
+                    http_response_code(StatusCodes::BAD_REQUEST);
+                    die("Invalid data in request body");
+                }
             }
 
             //Update database
@@ -124,9 +139,9 @@ class CoresController
         }
     }
     //Soft delete a core
-    public function deleteCore($coreTypeID){
-        //Permissions test
-        $role = Token::getRoleFromToken();
+    public function deleteCore($coreTypeID, $jwt = NULL){
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
             $core = new Core($coreTypeID);
             if ($core->deleteCore()) {
@@ -148,5 +163,15 @@ class CoresController
             http_response_code(StatusCodes::UNAUTHORIZED);
             die("No token provided");
         }
+    }
+
+    //Extract role
+    private function extractRoleFromToken($jwt = NULL){
+        try {
+            $role = Token::getRoleFromToken($jwt);
+        } catch (\Exception $err){
+            $role = NULL;
+        }
+        return $role;
     }
 }

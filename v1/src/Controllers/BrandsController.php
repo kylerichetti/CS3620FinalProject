@@ -18,11 +18,7 @@ class BrandsController
     //Get all active brands
     public function getAllBrands($jwt = NULL)
     {
-        try {
-            $role = Token::getRoleFromToken($jwt);
-        } catch (\Exception $err){
-            $role = NULL;
-        }
+        $role = $this->extractRoleFromToken($jwt);
 
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $brands = (new Brand())->getAllBrands();
@@ -41,11 +37,7 @@ class BrandsController
     }
     //Get a single brand by ID
     public function getBrandByID($brandID, $jwt = NULL){
-        try {
-            $role = Token::getRoleFromToken($jwt);
-        } catch (\Exception $err){
-            $role = NULL;
-        }
+        $role = $this->extractRoleFromToken($jwt);
 
         if($role == Token::ROLE_DEV || $role == Token::ROLE_ADMIN) {
             $brand = new Brand($brandID);
@@ -65,11 +57,7 @@ class BrandsController
     }
     //Create a brand
     public function createBrand($newBrandData, $jwt = NULL){
-        try {
-            $role = Token::getRoleFromToken($jwt);
-        } catch (\Exception $err){
-            $role = NULL;
-        }
+        $role = $this->extractRoleFromToken($jwt);
         if($role == Token::ROLE_ADMIN) {
             $brand = new Brand();
 
@@ -108,12 +96,8 @@ class BrandsController
     }
     //Update a brand
     public function updateBrand($brandID, $updatedBrandData, $jwt = NULL){
-        //Permissions test
-        try {
-            $role = Token::getRoleFromToken($jwt);
-        } catch (\Exception $err){
-            $role = NULL;
-        }
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
 
             $brand = new Brand($brandID);
@@ -157,12 +141,8 @@ class BrandsController
     }
     //Soft delete a brand
     public function deleteBrand($brandID, $jwt = NULL){
-        //Permissions test
-        try {
-            $role = Token::getRoleFromToken($jwt);
-        } catch (\Exception $err){
-            $role = NULL;
-        }
+        $role = $this->extractRoleFromToken($jwt);
+
         if($role == Token::ROLE_ADMIN) {
             $brand = new Brand($brandID);
             if ($brand->deleteBrand()) {
@@ -186,5 +166,13 @@ class BrandsController
         }
     }
 
-    //Extract t
+    //Extract role
+    private function extractRoleFromToken($jwt = NULL){
+        try {
+            $role = Token::getRoleFromToken($jwt);
+        } catch (\Exception $err){
+            $role = NULL;
+        }
+        return $role;
+    }
 }

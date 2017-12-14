@@ -54,8 +54,10 @@ class Core implements \JsonSerializable
     }
     public function setCoreTypeName($name){
         //Sanitize data
-        //$this->coreTypeName = filter_var($name, FILTER_SANITIZE_STRING);
-        $this->coreTypeName = $name;
+        $name = filter_var($name, FILTER_SANITIZE_STRING);
+        if(!empty($name)) {
+            $this->coreTypeName = $name;
+        }
     }
     public function setAtr($atr, $value){
         switch($atr){
@@ -74,7 +76,7 @@ class Core implements \JsonSerializable
 
         return $json;
     }
-    private function populate()
+    public function populate()
     {
         $db = dbConnection::getInstance();
         //Build database query

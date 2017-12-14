@@ -143,7 +143,7 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r)  
             $data['coreTypeName'] = filter_var($json->coreTypeName, FILTER_SANITIZE_STRING);
         } else {
             http_response_code(\BowlingBall\Http\StatusCodes::BAD_REQUEST);
-            exit();
+            exit("API");
         }
 
         return $coreCtrl->updateCore($args['id'], $data);

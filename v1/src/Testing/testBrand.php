@@ -11,7 +11,6 @@ namespace BowlingBall\Testing;
 use BowlingBall\Controllers\TokensController;
 use BowlingBall\Controllers\BrandsController;
 use BowlingBall\Http\StatusCodes;
-use BowlingBall\Models\Token;
 use BowlingBall\Models\Brand;
 use BowlingBall\Http\Methods;
 use BowlingBall\Utilities\Testing;
@@ -386,7 +385,6 @@ class testBrand extends TestCase
 
         try {
             $output = Testing::callAPIOverHTTP($endpoint, Methods::PATCH, $body, $token, Testing::JSON);
-            $outputJSON = (object)json_decode($output);
         } catch (\Exception $err) {
             $this->assertEmpty($err->getMessage(), "Error message: ". $err->getMessage());
         }
